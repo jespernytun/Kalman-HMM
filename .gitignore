@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Jupyter
+*.ipynb_checkpoints
+
+# Environment / secrets
+.env
+*.pem
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Data (uncomment if you start caching downloaded market data locally)
+# data/
