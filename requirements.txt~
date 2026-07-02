@@ -1,0 +1,11 @@
+numpy
+pandas
+matplotlib
+scipy
+jupyter
+ipykernel
+filterpy      # Kalman filters
+hmmlearn      # Hidden Markov Models
+yfinance      # real market data (optional, use once you have internet access)
+control       # Python Control Systems Library, for the LQR step later
+statsmodels
