@@ -17,7 +17,7 @@ class KalmanMatrices:
 
     ## We create a function that let's us create the Q and R matrices
     @classmethod
-    def create(cls, q_price: float, q_trend: float, r:float)  --> "KalmanMatrices":
+    def create(cls, q_price: float, q_trend: float, r:float) -> "KalmanMatrices":
         q = np.array([[q_price, 0.0],
                       [0.0,     q_trend]])
         return cls(Q=q, R=r)
