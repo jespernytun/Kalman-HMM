@@ -1,3 +1,10 @@
+# Creating a struct because I can
+@dataclass
+class Asset:
+    ticker: str
+    mu: float
+    sigma: float
+
 def simulate_gbm_market(assets, corr, s0, n_days=1000, dt=1/252, seed=None):
 
     rng = np.random.default_rng(seed)
