@@ -19,6 +19,9 @@ __pycache__/
 # OS
 .DS_Store
 
+# Claude
+CLAUDE.md
+
 # Editor
 .vscode/
 .idea/
