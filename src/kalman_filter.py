@@ -2,7 +2,6 @@ import numpy as np
 
 from dataclasses import dataclass
 
-
 # Our states
 @dataclass
 class KalmanState:
@@ -16,9 +15,9 @@ class KalmanMatrices:
     Q: np.array
     R: float
 
-    ## We create a function that let's us create the 
+    ## We create a function that let's us create the Q and R matrices
     @classmethod
-    def create(cls, q_price: float, q_trend: float, r:float) --> "KalmanMatrices":
-        q = np.array([[q_level, 0.0],
+    def create(cls, q_price: float, q_trend: float, r:float)  --> "KalmanMatrices":
+        q = np.array([[q_price, 0.0],
                       [0.0,     q_trend]])
         return cls(Q=q, R=r)
