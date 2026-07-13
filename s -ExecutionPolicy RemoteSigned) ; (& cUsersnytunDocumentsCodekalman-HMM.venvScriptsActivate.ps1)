@@ -1,0 +1,158 @@
+[1mdiff --git a/notebooks/01-portfolio-simulation.ipynb b/notebooks/01-portfolio-simulation.ipynb[m
+[1mindex 846f766..01bc08e 100644[m
+[1m--- a/notebooks/01-portfolio-simulation.ipynb[m
+[1m+++ b/notebooks/01-portfolio-simulation.ipynb[m
+[36m@@ -7,34 +7,33 @@[m
+    "source": [[m
+     "## Overview\n",[m
+     "\n",[m
+[31m-    "This notebook builds a synthetic multi-asset portfolio with known ground truth. The point is to have something where I know the \"true\" underlying price dynamics, so later I can check whether the Kalman filter and HMM are actually recovering that signal before testing them on real financial data.\n",[m
+[32m+[m[32m    "This notebook builds a synthetic multi-asset portfolio with a known ground truth. The point is to have something where I know the *true* underlying price dynamics, so later I can check whether the Kalman filter and HMM are actually recovering that signal — before testing them on real financial data.\n",[m
+     "\n",[m
+     "Four correlated assets, each with its own drift and volatility:\n",[m
+     "\n",[m
+[31m-    "- EQTY, generic equity\n",[m
+[31m-    "- BOND, fixed income\n",[m
+[31m-    "- GOLD, safe haven commodity\n",[m
+[31m-    "- TECH, higher growth, higher volatility"[m
+[32m+[m[32m    "| Ticker | Description                      | Drift (μ) | Volatility (σ) |\n",[m
+[32m+[m[32m    "|--------|-----------------------------------|-----------|-----------------|\n",[m
+[32m+[m[32m    "| EQTY   | generic equity                    | 0.07      | 0.18            |\n",[m
+[32m+[m[32m    "| BOND   | fixed income                      | 0.03      | 0.05            |\n",[m
+[32m+[m[32m    "| GOLD   | safe haven commodity               | 0.02      | 0.15            |\n",[m
+[32m+[m[32m    "| TECH   | higher growth, higher volatility  | 0.12      | 0.35            |\n",[m
+[32m+[m[32m    "\n",[m
+[32m+[m[32m    "Prices are simulated as correlated geometric Brownian motion, with the correlation imposed via a Cholesky decomposition — so the basket moves together roughly the way a real equity/bond/gold/tech portfolio would: EQTY and TECH trend together, EQTY and BOND move against each other, and GOLD stays mostly its own thing."[m
+    ][m
+   },[m
+   {[m
+    "cell_type": "code",[m
+[31m-   "execution_count": 5,[m
+[32m+[m[32m   "execution_count": 1,[m
+    "id": "e4a53cf7",[m
+[31m-   "metadata": {},[m
+[31m-   "outputs": [[m
+[31m-    {[m
+[31m-     "ename": "ModuleNotFoundError",[m
+[31m-     "evalue": "No module named 'yfinance'",[m
+[31m-     "output_type": "error",[m
+[31m-     "traceback": [[m
+[31m-      "\u001b[31m---------------------------------------------------------------------------\u001b[39m",[m
+[31m-      "\u001b[31mModuleNotFoundError\u001b[39m                       Traceback (most recent call last)",[m
+[31m-      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[5]\u001b[39m\u001b[32m, line 1\u001b[39m\n\u001b[32m----> \u001b[39m\u001b[32m1\u001b[39m \u001b[38;5;28;01mimport\u001b[39;00m yfinance \u001b[38;5;28;01mas\u001b[39;00m yf\n\u001b[32m      2\u001b[39m \u001b[38;5;28;01mimport\u001b[39;00m pandas \u001b[38;5;28;01mas\u001b[39;00m pd\n\u001b[32m      3\u001b[39m \u001b[38;5;28;01mimport\u001b[39;00m matplotlib.pyplot \u001b[38;5;28;01mas\u001b[39;00m plt\n\u001b[32m      4\u001b[39m \u001b[38;5;28;01mimport\u001b[39;00m numpy \u001b[38;5;28;01mas\u001b[39;00m np\n",[m
+[31m-      "\u001b[31mModuleNotFoundError\u001b[39m: No module named 'yfinance'"[m
+[31m-     ][m
+[32m+[m[32m   "metadata": {[m
+[32m+[m[32m    "execution": {[m
+[32m+[m[32m     "iopub.execute_input": "2026-07-13T15:02:44.908389Z",[m
+[32m+[m[32m     "iopub.status.busy": "2026-07-13T15:02:44.908389Z",[m
+[32m+[m[32m     "iopub.status.idle": "2026-07-13T15:02:45.776500Z",[m
+[32m+[m[32m     "shell.execute_reply": "2026-07-13T15:02:45.776500Z"[m
+     }[m
+[31m-   ],[m
+[32m+[m[32m   },[m
+[32m+[m[32m   "outputs": [],[m
+    "source": [[m
+     "import yfinance as yf\n",[m
+     "import pandas as pd\n",[m
+[36m@@ -53,9 +52,16 @@[m
+   },[m
+   {[m
+    "cell_type": "code",[m
+[31m-   "execution_count": null,[m
+[32m+[m[32m   "execution_count": 2,[m
+    "id": "6745a952",[m
+[31m-   "metadata": {},[m
+[32m+[m[32m   "metadata": {[m
+[32m+[m[32m    "execution": {[m
+[32m+[m[32m     "iopub.execute_input": "2026-07-13T15:02:45.778502Z",[m
+[32m+[m[32m     "iopub.status.busy": "2026-07-13T15:02:45.778502Z",[m
+[32m+[m[32m     "iopub.status.idle": "2026-07-13T15:02:45.781999Z",[m
+[32m+[m[32m     "shell.execute_reply": "2026-07-13T15:02:45.781999Z"[m
+[32m+[m[32m    }[m
+[32m+[m[32m   },[m
+    "outputs": [],[m
+    "source": [[m
+     "# Definition of assets\n",[m
+[36m@@ -90,9 +96,16 @@[m
+   },[m
+   {[m
+    "cell_type": "code",[m
+[31m-   "execution_count": null,[m
+[32m+[m[32m   "execution_count": 3,[m
+    "id": "b7d5333e",[m
+[31m-   "metadata": {},[m
+[32m+[m[32m   "metadata": {[m
+[32m+[m[32m    "execution": {[m
+[32m+[m[32m     "iopub.execute_input": "2026-07-13T15:02:45.784111Z",[m
+[32m+[m[32m     "iopub.status.busy": "2026-07-13T15:02:45.784111Z",[m
+[32m+[m[32m     "iopub.status.idle": "2026-07-13T15:02:45.804488Z",[m
+[32m+[m[32m     "shell.execute_reply": "2026-07-13T15:02:45.804488Z"[m
+[32m+[m[32m    }[m
+[32m+[m[32m   },[m
+    "outputs": [[m
+     {[m
+      "data": {[m
+[36m@@ -124,50 +137,50 @@[m
+        "  <tbody>\n",[m
+        "    <tr>\n",[m
+        "      <th>2023-01-02</th>\n",[m
+[31m-       "      <td>100.468725</td>\n",[m
+[31m-       "      <td>99.925930</td>\n",[m
+[31m-       "      <td>99.036536</td>\n",[m
+[31m-       "      <td>99.192573</td>\n",[m
+[32m+[m[32m       "      <td>100.626137</td>\n",[m
+[32m+[m[32m       "      <td>100.142358</td>\n",[m
+[32m+[m[32m       "      <td>100.166860</td>\n",[m
+[32m+[m[32m       "      <td>100.108271</td>\n",[m
+        "    </tr>\n",[m
+        "    <tr>\n",[m
+        "      <th>2023-01-03</th>\n",[m
+[31m-       "      <td>101.103727</td>\n",[m
+[31m-       "      <td>99.987337</td>\n",[m
+[31m-       "      <td>98.806665</td>\n",[m
+[31m-       "      <td>99.133226</td>\n",[m
+[32m+[m[32m       "      <td>99.657495</td>\n",[m
+[32m+[m[32m       "      <td>100.187300</td>\n",[m
+[32m+[m[32m       "      <td>99.721073</td>\n",[m
+[32m+[m[32m       "      <td>96.881116</td>\n",[m
+        "    </tr>\n",[m
+        "    <tr>\n",[m
+        "      <th>2023-01-04</th>\n",[m
+[31m-       "      <td>99.299676</td>\n",[m
+[31m-       "      <td>99.957337</td>\n",[m
+[31m-       "      <td>98.971929</td>\n",[m
+[31m-       "      <td>96.126216</td>\n",[m
+[32m+[m[32m       "      <td>99.672402</td>\n",[m
+[32m+[m[32m       "      <td>99.824064</td>\n",[m
+[32m+[m[32m       "      <td>100.968065</td>\n",[m
+[32m+[m[32m       "      <td>95.664495</td>\n",[m
+        "    </tr>\n",[m
+        "    <tr>\n",[m
+        "      <th>2023-01-05</th>\n",[m
+[31m-       "      <td>99.459117</td>\n",[m
+[31m-       "      <td>99.836767</td>\n",[m
+[31m-       "      <td>99.118693</td>\n",[m
+[31m-       "      <td>98.129782</td>\n",[m
+[32m+[m[32m       "      <td>98.181360</td>\n",[m
+[32m+[m[32m       "      <td>99.967033</td>\n",[m
+[32m+[m[32m       "      <td>100.701908</td>\n",[m
+[32m+[m[32m       "      <td>92.833300</td>\n",[m
+        "    </tr>\n",[m
+        "    <tr>\n",[m
+        "      <th>2023-01-06</th>\n",[m
+[31m-       "      <td>98.863125</td>\n",[m
+[31m-       "      <td>100.203243</td>\n",[m
+[31m-       "      <td>100.543569</td>\n",[m
+[31m-       "      <td>97.770381</td>\n",[m
+[32m+[m[32m       "      <td>99.095359</td>\n",[m
+[32m+[m[32m       "      <td>99.968302</td>\n",[m
+[32m+[m[32m       "      <td>99.920575</td>\n",[m
+[32m+[m[32m       "      <td>91.972300</td>\n",[m
+        "    </tr>\n",[m
+        "  </tbody>\n",[m
+        "</table>\n",[m
+        "</div>"[m
+       ],[m
+       "text/plain": [[m
+[31m-       "                  EQTY        BOND        GOLD       TECH\n",[m
