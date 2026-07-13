@@ -98,4 +98,4 @@ def run_kalman(prices: np.ndarray, noise: KalmanMatrices, dt: float = 1.0, A: np
         trend_filt[t] = state.trend
         P_filt[t] = state.P
 
-    return KalmanResult(price=price_filt, trend=trend_filt, P=P_filt)
+    return KalmanState(price=price_filt, trend=trend_filt, P=P_filt)
